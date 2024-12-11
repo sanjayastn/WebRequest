@@ -46,6 +46,23 @@ variable "ec2_egress_rules" {
   }
 }
 
+variable "ec2_from_port" {
+  default = 80
+}
+
+variable "ec2_to_port" {
+  default = 80
+}
+
+variable "ec2_protocol" {
+  default = "tcp"
+}
+
+variable "cidr_blocks" {
+  default = null
+}
+
+
 
 #################################  SG ELB #################################
 variable "sg_name" {

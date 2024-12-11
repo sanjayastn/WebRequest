@@ -19,10 +19,10 @@ module "sg_ec2" {
   description = var.ec2_description
   ingress_rules = {
     elb_ingress = {
-      from_port                = 80
-      to_port                  = 80
-      protocol                 = "tcp"
-      cidr_blocks              = null
+      from_port                = var.ec2_from_port
+      to_port                  = var.ec2_to_port
+      protocol                 = var.ec2_protocol
+      cidr_blocks              = var.cidr_blocks
       source_security_group_id = module.sg_elb.security_group_id
     }
   }
