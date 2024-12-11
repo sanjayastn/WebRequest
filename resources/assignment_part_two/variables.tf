@@ -53,47 +53,52 @@ variable "policy_arns" {
 
 
 
-##############################  SG ##############################
+############################## ELB SG ##############################
+
+
 variable "sg_name" {
-  description = "Name of the loadbalancer security group"
-  default     = "elb-sg"
+  default = "assignment-elb-sg"
 }
 
 variable "description" {
-  description = "Description about the security group"
-  default     = "SG to allow inbound and outbound traffic to ELB"
+  default = "SG to allow inbound and outbound traffic to ELB"
 }
 
-variable "ingress_rules" {
-  description = "Ingress rules for the security group"
-  default = [
-    {
-      from_port   = 443,
-      to_port     = 443,
-      protocol    = "tcp",
-      cidr_blocks = ["0.0.0.0/0"]
-    },
-    {
-      from_port   = 80,
-      to_port     = 80,
-      protocol    = "tcp",
-      cidr_blocks = ["0.0.0.0/0"]
+
+
+variable "elb_ingress_rules" {
+  description = "List of ingress rules"
+  default = {
+    http_ingress = {
+      from_port                = 80
+      to_port                  = 80
+      protocol                 = "tcp"
+      cidr_blocks              = ["0.0.0.0/0"]
+      source_security_group_id = null
     }
-  ]
-}
-
-variable "egress_rules" {
-  description = "Egress rules for the security group"
-  default = [
-    {
-      from_port   = 0,
-      to_port     = 0,
-      protocol    = "-1",
-      cidr_blocks = ["0.0.0.0/0"]
+    https_ingress = {
+      from_port                = 443
+      to_port                  = 443
+      protocol                 = "tcp"
+      cidr_blocks              = ["0.0.0.0/0"]
+      source_security_group_id = null
     }
-  ]
+  }
 }
 
+
+variable "elb_egress_rules" {
+  description = "List of egress rules"
+  default = {
+    elb_egress = {
+      from_port                = 0
+      to_port                  = 0
+      protocol                 = "-1"
+      cidr_blocks              = ["0.0.0.0/0"]
+      source_security_group_id = null
+    }
+  }
+}
 
 
 ##############################  ELB ##############################
@@ -164,7 +169,7 @@ variable "lis_type" {
 }
 
 
-##############################  LT ##############################
+############################## LT ##############################
 variable "lt_name" {
   default = "assignment-launch-template"
 }
@@ -180,7 +185,7 @@ variable "lt_ami_id" {
 
 
 
-##############################  ASG ##############################
+############################## ASG ##############################
 
 variable "instance_type" {
   description = "Instance type for EC2 instances"
@@ -211,7 +216,7 @@ variable "asg_propagate_at_launch" {
 }
 
 variable "associate_public_ip_address" {
-  default = true
+  default = false
 }
 
 
@@ -267,7 +272,7 @@ variable "skip_final_snapshot" {
 }
 
 
-############################## SG RDS##############################
+############################## SG RDS ##############################
 
 variable "sg_rds_name" {
   default = "assignment-rds-sg"
@@ -279,26 +284,29 @@ variable "rds_description" {
 
 variable "rds_ingress_rules" {
   description = "Ingress rules for the security group"
-  default = [
-    {
-      from_port   = 3306,
-      to_port     = 3306,
-      protocol    = "tcp",
-      cidr_blocks = ["10.0.0.0/16"]
+  default = {
+    rds_ingress = {
+      from_port                = 3306,
+      to_port                  = 3306,
+      protocol                 = "tcp",
+      cidr_blocks              = ["10.0.0.0/16"]
+      source_security_group_id = null
     }
-  ]
+  }
 }
+
 
 variable "rds_egress_rules" {
   description = "Egress rules for the security group"
-  default = [
-    {
-      from_port   = 0,
-      to_port     = 0,
-      protocol    = "-1",
-      cidr_blocks = ["0.0.0.0/0"]
+  default = {
+    rds_egress = {
+      from_port                = 0,
+      to_port                  = 0,
+      protocol                 = "-1",
+      cidr_blocks              = ["0.0.0.0/0"]
+      source_security_group_id = null
     }
-  ]
+  }
 }
 
 
@@ -312,26 +320,32 @@ variable "ec2_description" {
   default = "SG to allow secured connection to ec2 instances"
 }
 
-variable "ec2_ingress_rules" {
-  description = "Ingress rules for the security group"
-  default = [
-    {
-      from_port   = 80,
-      to_port     = 80,
-      protocol    = "tcp",
-      cidr_blocks = ["10.0.0.0/16"]
-    }
-  ]
+variable "ec2_from_port" {
+  default = 80
 }
+
+variable "ec2_to_port" {
+  default = 80
+}
+
+variable "ec2_protocol" {
+  default = "tcp"
+}
+
+variable "cidr_blocks" {
+  default = null
+}
+
 
 variable "ec2_egress_rules" {
   description = "Egress rules for the security group"
-  default = [
-    {
-      from_port   = 0,
-      to_port     = 0,
-      protocol    = "-1",
-      cidr_blocks = ["0.0.0.0/0"]
+  default = {
+    ec2_egress = {
+      from_port                = 0,
+      to_port                  = 0,
+      protocol                 = "-1",
+      cidr_blocks              = ["0.0.0.0/0"]
+      source_security_group_id = null
     }
-  ]
+  }
 }

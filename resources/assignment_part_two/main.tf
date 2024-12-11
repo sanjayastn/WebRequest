@@ -28,18 +28,26 @@ module "sg_elb" {
   sg_name       = var.sg_name
   vpc_id        = module.vpc.vpc_id
   description   = var.description
-  ingress_rules = var.ingress_rules
-  egress_rules  = var.egress_rules
+  ingress_rules = var.elb_ingress_rules
+  egress_rules  = var.elb_egress_rules
 }
 
 module "sg_ec2" {
   source = "../../modules/sg"
 
-  sg_name       = var.sg_ec2_name
-  vpc_id        = module.vpc.vpc_id
-  description   = var.ec2_description
-  ingress_rules = var.ec2_ingress_rules
-  egress_rules  = var.ec2_egress_rules
+  sg_name     = var.sg_ec2_name
+  vpc_id      = module.vpc.vpc_id
+  description = var.ec2_description
+  ingress_rules = {
+    elb_ingress = {
+      from_port                = var.ec2_from_port
+      to_port                  = var.ec2_to_port
+      protocol                 = var.ec2_protocol
+      cidr_blocks              = var.cidr_blocks
+      source_security_group_id = module.sg_elb.security_group_id
+    }
+  }
+  egress_rules = var.ec2_egress_rules
 }
 
 
@@ -87,7 +95,7 @@ module "asg" {
   instance_profile            = module.iam.instance_profile_name
   security_group_id           = module.sg_ec2.security_group_id
   asg_name                    = var.asg_name
-  asg_subnets                 = module.vpc.public_subnet_ids
+  asg_subnets                 = module.vpc.private_subnet_ids
   min_size                    = var.min_size
   max_size                    = var.max_size
   desired_capacity            = var.desired_capacity
