@@ -6,19 +6,27 @@ module "sg_elb" {
   sg_name       = var.sg_name
   vpc_id        = data.aws_vpc.default.id
   description   = var.description
-  ingress_rules = var.ingress_rules
-  egress_rules  = var.egress_rules
+  ingress_rules = var.elb_ingress_rules
+  egress_rules  = var.elb_egress_rules
 }
 
 # calling security group module for sg creation
 module "sg_ec2" {
   source = "../../modules/sg"
 
-  sg_name       = var.sg_ec2_name
-  vpc_id        = data.aws_vpc.default.id
-  description   = var.sg_ec2_description
-  ingress_rules = var.sg_ec2_ingress_rules
-  egress_rules  = var.sg_ec2_egress_rules
+  sg_name     = var.sg_ec2_name
+  vpc_id      = data.aws_vpc.default.id
+  description = var.ec2_description
+  ingress_rules = {
+    elb_ingress = {
+      from_port                = 80
+      to_port                  = 80
+      protocol                 = "tcp"
+      cidr_blocks              = null
+      source_security_group_id = module.sg_elb.security_group_id
+    }
+  }
+  egress_rules = var.ec2_egress_rules
 
 }
 
